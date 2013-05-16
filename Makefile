@@ -11,4 +11,4 @@ report.pdf: $(SRCS)
 	pdflatex report
 
 clean:
-	@rm -f *.aux *.toc *.log report.pdf
+	@rm -f *.aux *.toc *.log *.blg report.pdf
