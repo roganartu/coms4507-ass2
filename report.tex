@@ -1,0 +1,128 @@
+\documentclass[11pt,a4paper,twoside,openright]{book}
+
+% Use a nice font
+\usepackage[bitstream-charter]{mathdesign}
+\usepackage[T1]{fontenc}
+
+\usepackage{pdflscape}
+\usepackage{graphicx}
+\usepackage{acronym}
+
+% Set up the margins
+\usepackage[margin=2.8cm]{geometry}
+%\usepackage[vmargin=2.8cm,hmargin=2.25cm]{geometry}
+%\geometry{bindingoffset=1cm}
+
+\usepackage{setspace}
+\onehalfspacing
+
+% Colour and title packages
+\usepackage[table]{xcolor}
+\usepackage{titlesec}
+
+\definecolor{DarkBlue}{rgb}{.0,.184,.341}
+\titleformat*{\section}{\Large\color{DarkBlue}}
+\titleformat*{\subsection}{\large\color{DarkBlue}}
+
+% Code listings package
+\usepackage{listings}
+
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+\definecolor{grey}{rgb}{0.7,0.7,0.7}
+
+\lstdefinestyle{sharpc}{language=[Sharp]C,
+basicstyle=\footnotesize\ttfamily,
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+keywordstyle=\color{bluekeywords}\bfseries,
+stringstyle=\color{redstrings},
+rulecolor=\color{grey},
+frame=tlrb
+}
+
+\lstdefinestyle{c}{language=C,
+basicstyle=\footnotesize\ttfamily,
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+keywordstyle=\color{bluekeywords}\bfseries,
+stringstyle=\color{redstrings},
+rulecolor=\color{grey},
+frame=tlrb
+}
+
+
+% Fix the page numbering on the chapter heading pages
+\usepackage{fancyhdr}
+
+\setlength{\headheight}{13.6pt}
+
+\fancypagestyle{plain}{ %redefining plain pagestyle
+\fancyhf{} %clear all headers and footers fields
+\fancyhead[R]{\thepage} %prints the page number on the right side of the header
+\renewcommand{\headrulewidth}{0.0pt}
+}
+
+% Longtable for tables that break over pages
+\usepackage{longtable}
+
+% Load hyperref last
+\usepackage[hidelinks]{hyperref}
+
+\hypersetup
+{
+    pdfauthor={Stephen Gentle, Carl Hattenfels & Tony Lee},
+    pdftitle={Cyber Security Challenge Australia Competition: The Road to Victory (ish)}
+}
+
+\begin{document}
+\frontmatter
+
+% The title page
+\begin{titlepage}
+\begin{center}
+\includegraphics[width=0.3\textwidth]{images/UQLogo}\\[0.3cm]
+
+\textsc{\LARGE The University of Queensland}\\[0.4cm]
+
+\textsc{\Large School of Information Technology and Electrical Engineering}\\[2cm]
+
+{\huge Cyber Security Challenge Australia Competition: The Road to Victory (ish)}\\[1.8cm]
+
+{\Large Stephen Gentle, Carl Hattenfels & Tony Lee}\\[1.5cm]
+{\large COMS4507}\\[0.5cm]
+{\large June 2013}\\[5.4cm]
+
+\end{center}
+
+\end{titlepage}
+
+% Put the letter on the left
+\cleardoublepage
+
+\include{abstract}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\mainmatter
+\include{introduction}
+
+\clearpage
+\bibliography{references}{}
+\bibliographystyle{IEEEtran}
+\addcontentsline{toc}{chapter}{References}
+
+\end{document}
