@@ -1,12 +1,13 @@
-\documentclass[11pt,a4paper,twoside,openright]{book}
+\documentclass[11pt,a4paper,oneside]{book}
 
 % Use a nice font
-\usepackage[bitstream-charter]{mathdesign}
+\usepackage[scaled]{helvet}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
 \usepackage[T1]{fontenc}
 
 \usepackage{pdflscape}
 \usepackage{graphicx}
-\usepackage{acronym}
+%\usepackage{acronym}
 
 % Set up the margins
 \usepackage[margin=2.8cm]{geometry}
@@ -78,11 +79,11 @@ frame=tlrb
 \usepackage{longtable}
 
 % Load hyperref last
-\usepackage[hidelinks]{hyperref}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 
 \hypersetup
 {
-    pdfauthor={Stephen Gentle, Carl Hattenfels & Tony Lee},
+    pdfauthor={Stephen Gentle, Carl Hattenfels \& Tony Lee},
     pdftitle={Cyber Security Challenge Australia Competition: The Road to Victory (ish)}
 }
 
@@ -92,7 +93,7 @@ frame=tlrb
 % The title page
 \begin{titlepage}
 \begin{center}
-\includegraphics[width=0.3\textwidth]{images/UQLogo}\\[0.3cm]
+%\includegraphics[width=0.3\textwidth]{images/UQLogo}\\[0.3cm]
 
 \textsc{\LARGE The University of Queensland}\\[0.4cm]
 
@@ -100,7 +101,7 @@ frame=tlrb
 
 {\huge Cyber Security Challenge Australia Competition: The Road to Victory (ish)}\\[1.8cm]
 
-{\Large Stephen Gentle, Carl Hattenfels & Tony Lee}\\[1.5cm]
+{\Large Stephen Gentle, Carl Hattenfels \& Tony Lee}\\[1.5cm]
 {\large COMS4507}\\[0.5cm]
 {\large June 2013}\\[5.4cm]
 
@@ -121,8 +122,8 @@ frame=tlrb
 \include{introduction}
 
 \clearpage
-\bibliography{references}{}
-\bibliographystyle{IEEEtran}
-\addcontentsline{toc}{chapter}{References}
+%\bibliography{references}{}
+%\bibliographystyle{IEEEtran}
+%\addcontentsline{toc}{chapter}{References}
 
 \end{document}
