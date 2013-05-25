@@ -27,7 +27,11 @@ elsewhere.
 \section{Mitigation Question 1.1.1}
 \textbf{What advice would you recommend to best mitigate information leakage?}
 \subsection{Approach}
-Approach details go here
+Our mitigation suggestion for this vulnerability was twofold; firstly, we pointed
+out the Apache configuration parameter that was making directory listings
+available (namely "Options + Indexes") as well as indicating the correct
+setting, and secondly we suggested that they don't store secret files in a
+publically accessible area such as a public-facing website.
 
 \section{Question 1.2}
 \textbf{Determine how to activate a new user without the web administrator's
