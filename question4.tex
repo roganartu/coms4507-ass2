@@ -1,7 +1,13 @@
+\lstset{basicstyle=\tiny}
+
 \chapter{Question 4 - Memory Dump Analysis}
 
 \section{Preparation}
-Prep goes here
+Preparation for this part of the challenge focused on familiarisation with the recommended tools. The recommended tools were IDA, ollydbg, and Volatility. There is considerable overlap between these tools, however we sought to familiarise ourselves with each of these tools. A brief summary of each of these tools follows:
+
+The first task was to identify the source of the memory dump. No details were given on the host operating system from which the dump was taken. We had been told we were to use the memory analysis tool Volatility for analysis, which supports the following operating systems:
+
+
 
 \section{Given Information}
 All teams were given a memory dump file prior to the competition: MEMORY.7z\\
@@ -17,7 +23,14 @@ a) What is the PID of the initial malicious process?
 \\\\
 Example answer format: [1234] [2010-01-23 23:34:56] [4321]}
 \subsection{Approach}
-Approach details go here
+Our first challenge in answering this question lay in identifying some necessary information about the origin of the memory dump we had been supplied with. In order for Volatility, the memory dump analysis tool we were using, to properly parse and inspect the memory dump, we need to specify the desired profile. Volatility supports many target operating system profiles and address spaces, including most versions of Windows XP, 2003, 2008, Vista and 7 in both x86 and x64. Volatility also has limited support for several version of Mac OSX and some distributions of Linux. \\
+Our first attempt to determine the memory dump origin was to use the imageinfo plugin for volatility. The imageinfo plugin is designed to easily indentify the target operating system. Unfortunately, the imageinfo plugin was unable to determine any valuable information about the dump. However, by supplying a suggested profile argument to the imagineinfo plugin, we could effectively brute-force this information by trying all possible profiles. If the suggested profile was infact the original profile, then volatility would return a variety of information about the dump. \\
+Given that we were trying to indentify a malicious process in this memory dump, and knowing that the majority of malware is designed to operate on the Windows platform, we restricted our choices to those Windows based profiles that Volatility supports. We used a small bash script to run Volatility against the dump with each of the available profiles, and record the output to a file.\\ 
+The script took about 10 minutes to complete, and we could see that volatility had succeeded when specifying a Windows 7 x64 profile. For all future use of Volatility, we specified this profile.\\
+Volatility has several plugins that allow us to inspect in the processes that were running at the time of the memory dump. We used the pslist plugin to dump a list of all running processes, including their name, process id, parent process id, and the time at which that process started and exited. \\
+The majority of processes in the list appear innocuous, however one process, svc.exe stands out. This process is supicious because, while svc.exe is not the name of any Windows inbuilt process, it's name bares a similarity with svchost.exe, which is a generic service hosting process for DLL's (Windows Internals 7th Edition, page 11). This could be an attempt by the creator to have the process go unnoticed by nontechnical users who may be viewing the processes running on their system (for instance when trying to determine which processes are hogging resources). Our suspicions are raised further when we notice in the process list that cmd.exe (a windows command line) has just been started and then exited within 2 seconds. The PPID of this cmd.exe process is the PID of our suspect process, which is unusual behaviour.Our final confirmation came from a quick google for "svc.exe" which uncovered a number of different viruses using the svc.exe process name.\\
+While we were quite certain at this point that svc.exe was our culprit, which would make our final answer "[1640] [2013-01-21 00:37:03] [2780]", we waited until we had completed Question 4.2 and 4.3 before we submitted this answer, which was correct.
+
 \subsection{Retrospective Approach}
 Retrospective approach details go here
 
@@ -27,7 +40,11 @@ Retrospective approach details go here
 \\\\
 Example answer format: [127.0.0.1] [mutex1]}
 \subsection{Approach}
-Approach details go here
+
+Volatility has several modules for obtaininglists of open connections and sockets, however only one such plugin, netscan, is compatible with 64 bit memory dumps, such as we had. Consqeuently we were able to immediate move to using this plugin to obtain a list of all open TCP and UDP connections. This information includes the remote and local address, and the PID of the initiating process. We identified a connection in this list with the same PID as our previously identified process (1640). \\
+We then needed to find the name of the mutex being used by the malicious process. Mutexes are commonly used by malware to retain ownership over a compromised machine and ensure only a single instance of a piece of malware can run at any time. We can use the volatility handles plugin to enumerate the open handles of a given PID. Again, by using the the PID found in 4.1, we can return all the mutants held by that process. Mutant is the term used internally by the Windows kernel for a mutex (Windows Internals 7th Edition page 57). The results show that the process with PID 1640 holds 4 mutants, with one named "Sys322" and the rest being unnamed.\\
+Our final answer for this section is [10.10.31.210] [Sys322]
+
 \subsection{Retrospective Approach}
 Retrospective approach details go here
 
@@ -41,7 +58,11 @@ Example answer format:
 [\textbackslash{}Device\textbackslash{}HarddiskVolume2\textbackslash{}folder
 name\textbackslash{}filename.ext] [2010-01-23 23:34:56]}
 \subsection{Approach}
-Approach details go here
+
+As with our identification of the mutex handles held by the process, we use the same "handle" plugin to enumerate all the file handles currently possessed by the process. The process has handles to several directories, and interestingly a handle to a file called "logg.dat". Although we can find the names of currently open files and directories, we cannot find out any other valuable file information from the handle plugin.\\
+However, we know that our memory dump comes from a Windows 7 operating system, and so the underlying file system is guaranteed to be NTFS. Thankfully, Volatility has yet another plugin, "mftparser", which allows use to parse and output the contents of the Master File Table (MFT) of NTFS volumes.\\
+The MFT of an NTFS volume contains one entry for every file on the volume. Each entry contains information on a files "size, time and date stamps, permissions, data content" (http://msdn.microsoft.com/en-us/library/windows/desktop/aa365230(v=vs.85).aspx). If the data for a file is too large to reside in the MFT, then the MFT instead contains information about the files location.\\
+Considering that the MFT contains information about every open file in the system, it's understandably large (nearly 500,000 lines long, in this case). The output of the "mftparser" plugin was saved to a file, and then grep was used to locate any entries that corresponded to the open file handles of the malicious process. Through this technique we were able to find the time of creation of the logg.dat file. This file was opened approximately 4 seconds after our malicious process started, another strong indication that we have found our file. Our correct answer for this question was [logg.dat] [2013-01-21 00:37:07]. 
 \subsection{Retrospective Approach}
 Retrospective approach details go here
 
@@ -115,7 +136,6 @@ exploitation of the computer?
 CEO's laptop?
 \\\\
 Example answer format: [http://sub.domain.com/website] [email@domain.com]}
-\subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+=======
+\textbf{Question text goes here}
+The scenario presented to use for this part of the challenge was the CEO of 
