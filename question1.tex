@@ -78,7 +78,11 @@ requested via POST and are probably the most susceptible to injection.
 \section{Mitigation Question 1.2.1}
 \textbf{What advice would you recommend to best mitigate SQL Injection?}
 \subsection{Approach}
-Approach details go here
+The first and foremost way to prevent SQL injection is to perform server-side
+sanitation of user input. The website provided had client-side sanitation of the
+injectable field, but clearly performed no server-side sanitation to strip out
+potentially malicious text from SQL queries. Most web frameworks provide some
+family of SQL sanitation methods to simplify this process.
 
 \section{Question 1.3}
 \textbf{Retrieve the flag from the administrator's page}
