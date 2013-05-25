@@ -6,9 +6,23 @@ Prep goes here
 \section{Question 1.1}
 \textbf{Find the flag hidden in a secret document}
 \subsection{Approach}
-Approach details go here
+Although the question was (presumably intentionally) ambiguous in it's wording,
+we guessed that it would be some sort of incorrect web server configuration,
+allowing directory level browsing and hence detection of 'hidden' files. In
+order to easily discover vulnerable ports and paths we ran a scan of the web
+server with Nessus while we went and grabbed some lunch.
+
+The scan took approximately 45 minutes to complete, and showed us that our
+assumption was correct in that the web server allowed traversing through
+directories. A quick manual search through available directories found a file
+called secret.txt which contained the flag.
 \subsection{Retrospective Approach}
-Retrospective approach details go here
+We're confident that our approach was the optimal way to go about finding this
+vulnerability. We could have instead acted on our assumption and begun looking
+for directory paths manually or just scanned for them and nothing else but the
+information from the Nessus scan was useful for many aspects of the competition
+and if our assumption was wrong we could have wasted a lot of time better spent
+elsewhere.
 
 \section{Mitigation Question 1.1.1}
 \textbf{What advice would you recommend to best mitigate information leakage?}
