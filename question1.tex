@@ -37,9 +37,43 @@ publically accessible area such as a public-facing website.
 \textbf{Determine how to activate a new user without the web administrator's
 verification. Log into the website with this user and retrieve the flag}
 \subsection{Approach}
-Approach details go here
+We began by reviewing the Nessus scan and manually snooping around the website
+to find forms and HTTP endpoints that could possibly be vulnerable to SQL
+injection. After compiling a list of endpoints, we ran scans using sqlmap and
+sqlninja to try and find whether certain parameters were susceptible to
+injection. We speculated that the user registration form was where the
+vulnerability was most likely to be, but were unable to get sqlmap or sqlninja
+to properly analyse this endpoint as it kept referring to the url as 'unstable'
+because the page changed after sending requests to it.
+
+An hour of trying various different combinations of parameters later, we
+reverted to manual injection attempts, trying to extract some information from
+the server in a blind attack fashion. After still failing to discover any
+vulnerabilities we decided to move onto other flags, periodically returning to
+this one. With less than one hour to go in the competition we returned to this
+flag and found that submitting the registration form with an existing email
+address stabilised the page.
+
+Almost immediately after this we managed to get the server to output some
+unescaped database errors and it was trivial to go from there to the actual SQL
+injection which involved fake string completion and a premature query
+terminator, saving a value of 1 instead of 0 into the authenticated field for
+the user.
 \subsection{Retrospective Approach}
-Retrospective approach details go here
+This flag took far longer to retrieve than it should have, and most definitely
+prevented us from completing the rest of the Web Application Pentesting
+questions. Realistically, we should have tried to find a stable version of the
+registration page for sqlmap much earlier than we did. Once we had some database
+errors outputting onto the web page it was almost trivial to convert into a
+successful injection.
+
+Our problem lied in the fact that sqlmap was not sending a
+valid value to the injectable parameter (phoneNumber) before any injection text.
+This seemed to be a prerequisite for successful form submission and hence for
+allowing our injection text to actually reach the database at all. Doing it
+again, we would definitely put a real focus on trying to find a stable version
+of any page that sqlmap reports as unstable. In most cases these pages are
+requested via POST and are probably the most susceptible to injection.
 
 \section{Mitigation Question 1.2.1}
 \textbf{What advice would you recommend to best mitigate SQL Injection?}
