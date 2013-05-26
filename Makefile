@@ -13,7 +13,7 @@ all: report.pdf
 
 report.pdf: $(SRCS)
 	pdflatex report
-	#bibtex report
+	bibtex report
 	#pdflatex report
 	pdflatex report
 
