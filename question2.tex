@@ -1,8 +1,12 @@
 \chapter{Question 2 - Corporate Network Pentest}
 
 \section{Preparation}
-Prep goes here
+Preparation for the corporate network pentest focused around familiarisation with the suggested tools. We used Kali Linux, a linux distribution devoted to penetration testing, and successor to the venerable Backtrack distribution. Kali Linux comes with over 300 penetration testing tools preinstalled \cite{kali} . Knowing which tools to use in which circumstance is a major challenge.\\
+In order to gain some practical experience with the available tools, we simulated a vulnerable target network 
+through the use of virtual machines. The target network consisted of machines running: Windows 7, Windows Server 2003, Windows Server 2008, Windows XP, Ubuntu Linux 12.04. The network also contained several deliberately vulnerable virtual machines. These distributions have been created by members of the pentesting community as a resource for others to practice with. We included: Metasploitable 2, De-Ice, Damn Vulnerable Linux and Kioptrix 1-4. Each of these are available for free online. The network also contained virtual firewall using the pFSense linux firewall distribution.\\
+An OpenVPN server was used to facilitate secure access to the virtual network from outside the local network of the host machine. To secure the VPN solution, we used the OpenSSL toolkit to create a public key infrastructure. On the host machine we generated a certication authority certificate which we used to sign key pairs (1024 bit RSA) generated for each team member as well as the OpenVPN server. We also enabled TLS authentication, which adds an extra HMAC signature to TLS hanshake packets \cite{openvpn}.Finally, we ran the OpenVPN server daemon in a chroot jail. This meant that, should the OpenVPN server be compromised, the successful attacker would at least have an extra obstacle in gaining access to the whole host system. For each team member, the necessary keys and certificates were delivered by sneaker-net (in person with a usb). \\
 
+Configuring the OpenVPN network had an added benefit in so far as our experience utilising the technology helped us in our approach to Question 6. 
 \section{Given Information}
 Gain access to the corporate network and solve the following questions.
 \\\\
@@ -19,23 +23,26 @@ Note: The firewall and the external DNS/Email were not targets.
 \textbf{Gain access to a workstation on the corporate network and retrieve the
 flag from their browser's saved passwords.}
 \subsection{Approach}
-Approach details go here
+The initial phase of our penetration test focused on passive reconaissance. We investigated the company website (the target of Question 1). We obtained several pieces of information, including the email address and name of an HR employee. We were also provided with a diagram of the target network. The diagram showed that our target machines were protected by a firewall. We then proceeded to active reconaissance. We first used nmap to do a ping-sweep of the network to discover any active hosts. We again used nmap to perform a portscan on the one host that was discovered. The portscan reported that ports 80 and 8080 were upon. We were unable to ascertain any further useful information about the services running on the host, and hence we were likely encountering the aforementioned firewall.\\
+Considering that a direct exploitation of the firewall was unlikely, we decided to use the email address we had previously obtained to launch a spear-phishing attack. We crafted an email claiming to be interested in employment at the target company.\\
+We then created a fake Microsoft Word document, and used the metasploit framework to generate a reverse tcp payloadtrojan. This payload could be embedded into the word document as a macro, and would execute upon opening on the victims computer. The payload contained code which would attempt to connect back to the address and port specified during payload generation. We set the payload to connect back to our own address and an arbitrary port. We again used the metasploit framework to initiate a handler, a server which handles connections between the local host and a remote payload.\\
+We then attached the infected Word document to the phishing email and sent it. We quickly received an automated response stating that the attachment would be opened within 5 minutes. After 5 minutes the attack still had not succeeded so we launched a second attempt using a different exploit, which also failed.\\
+We then moved to the creation of a malicious website. We used the metasploit framework to create a webserver which when queried would deliver Javascript allowing arbitrary code execution outside of the java sandbox. The specific module we used exploits vulnerability CVE-2011-3544. The chosen exploit works on any browser that supports Java.\\
+We revised our phishing email to include the malicious link. This attack vector also failed. We then realised that the firewall was likely blocking the victims machine from making outbound connections to unknown ports. We regenerated our payload and used port 80 as server port. We assumed the firewall would allow outbound connections on port 80, as this is generally necessary for access to the web. Once we had regenerated and sent our payload we succeeded in connecting to the target machine through the firewall. Once we had a connection, we were able to access the commandline on the target machine.\\
+Once we had access to the machine, it was trival to navigate to and obtain the users saved browser passwords.
 \subsection{Retrospective Approach}
-Retrospective approach details go here
-
+Our approach was generally correct. However, we performed several network scans, and had to resend our spear-phishing email several times. In a real world situation, where being covert is usually important, this attack would not have succeeded and we would have had to take a new approach. It would have been prudent to first test our exploits on a virtual network that simulated the target network, in order to discover any suprises (such as using incorrect ports) before launching our attack proper. However, given the time constraints it was unlikely we would have been able to achieve that. 
 \section{Mitigation Question 2.1.1}
 \textbf{What is the best way to prevent corporate network insecurities?}
+In answering this question, we referred to Strategies to Mitigate Targeted Cyber Intrusions (dsd citation), released by the Defence Signals Directorate. This document lists the 35 top mitigation strategies. We further stated that implementing at least the top 4 mitigation strategies, application whitelist, patching applications, patching operating systems, and minimising the number of users with elevated privileges, was the most effective way to prevent instrusions such as this. One of the top 4 mitigation strategies, application patching, is particularly applicable to question 2.1. 
 \subsection{Approach}
-Approach details go here
-
-\section{Question 2.2}
+section{Question 2.2}
 \textbf{Gain access to a privileged account on the corporate network and
 retrieve the flag from their Desktop}
 \subsection{Approach}
-Approach details go here
+Although we had gained access to a machine on the target network, our payload was running in the context of an unprivileged user. In order to complete this challenge, we need to escalate the privileges of our running process, or to migrate our shell to a running process with higher privileges. Because the compromised computer was running a fully patched version of Windows 7, which implements User Account Controls, normal metasploit tools for privilege escalation were of no use. Unfortunately, the team was not able to achieve privilege escalation on the target machine within the allocated time.
 \subsection{Retrospective Approach}
-Retrospective approach details go here
-
+As access to the target network is no longer available, it is not possible to determine what avenues of privilige escalation may have been available. Consequently we cannot offer a retrospective approach.
 \section{Mitigation Question 2.2.1}
 \textbf{Unknown mitigation question}
 \subsection{Approach}
@@ -46,10 +53,9 @@ related mitigation question.
 \textbf{Gain access to the Domain Controller and retrieve the flag from the
 CEO's roaming profile}
 \subsection{Approach}
-Approach details go here
+Our approach to this question relied on our completion of Question 2.2. Had we been able to gain administrator privileges on the compromised machine, we would then have altered that machines routing table to allow for the routing of traffic between our machine and the local network of the compromised machine. Utilising one compromised machine to attach other machines on the same network is commonly referred to in the pentesting community as "pivoting". Once we had pivoted, we would have attempted to exploit a vulnerabile service running on the domain controller. 
 \subsection{Retrospective Approach}
-Retrospective approach details go here
-
+Having been unable to complete Question 2.2, we were unable to gain any information about the domain controllers configuration, location or potential attack vectors. Consequently we cannot offer a retrospective approach.
 \section{Mitigation Question 2.3.1}
 \textbf{Unknown mitigation question}
 \subsection{Approach}
