@@ -1,9 +1,22 @@
 \chapter{Question 3 - Application Code Assessment}
 
 \section{Preparation}
-Prep goes here
+Not much preparation was required for this part of the competition, as the
+members of the team were already quite confident in analysing and debugging
+application code. Research was undertaken into common problems that can lead to
+code being vulnerable to various attacks - for example, buffer overflows that
+can allow an attacker to inject arbitary executable code into an application.
 
 \section{Given Information}
+Question 3 centred around an imaginary protocal called VSTP, for the Very 
+Simple Transfer Protocol. The protocol was implemented in the Python 
+programming language, and used the gnupg library for public key cryptography
+to establish a secure channel to transfer a 256 bit sesion key, which was then
+used to encrypt the rest of the session with AES in cipher feedback mode.
+
+The program then presented a basic command line interface which allowed a user
+to transfer files, remove files from the server, list directories, etc.
+
 There was a server running VSTP: 172.16.1.20 port 5678
 \\\\
 All teams were given the file: vstp-package.zip
@@ -32,23 +45,80 @@ We were also given an unprivileged login to the server (SSH):\\
 (vstp\_server.py). Review the code and exploit the vulnerability to retrieve the
 flag from the ".garbage." file}
 \subsection{Approach}
-Approach details go here
+An analysis of the code quickly revealed that there was a vulnerability in the
+move file (mv) command - when the server received the command from the user,
+it used the system command to execute the system's move command 
+
 \subsection{Retrospective Approach}
-Retrospective approach details go here
+None?
 
 \section{Question 3.1.1}
 \textbf{INSERT MITIGATION QUESTION}
 \subsection{Approach}
-Approach details go here
+The mitigaion for this 
 
 \section{Question 3.2}
 \textbf{Located with the previous flag is a PCAP file containing a VSTP session.
 Exploit the encryption vulnerability in the server code to decrypt the session,
 extract the file transferred and retrieve the flag}
 \subsection{Approach}
-Approach details go here
+At first glance, the VSTP protocol seems quite secure, as it is using a 256
+bit key, which is too large to brute force and will not be able to be cracked
+until a crytographic weakness on AES is found. As AES is currently one of the
+most commonly used ciphers today, it is out of the scope of the competition to
+find such a weakness in it.
+
+The vulnerability instead concerned the way the session key was generated. If
+the key had been properly random, there would have been no way to crack it. But
+the code that generated the key was very badly designed - the first 80 bits of
+the key was hardcoded to always be the string "VSTPSERVER", then the next 64
+were the date (in ASCII characters, formatted as YYYYMMDD), followed by the IP
+address of the client in ASCII with the dot characters removed (32 to 96 bits,
+depending on how long the IP was), then a two digit random number between 10
+and 74, and the rest with actually random data (produced from the urandom 
+function).
+
+What this unusal key generation method produced was a key with very little
+entropy. The client IP and date were able to be gathered from the network
+capture, so straight up the first 216 bits were known. This meant that
+only 40 bits needed to be brute forced, which was easily acheivable. The
+fact that 16 of those bits were known to be an ASCII number between 10
+and 40 reduces the entropy in the key by 10 bits to only 30 bits.
+
+A known plaintext was required to be able to run the brute force, and this
+was easily found in the network packet capture. Since the packets were not
+padded at all, the message length was the length of the unencrypted message
+plus the 16 bit initialisation vector. This meant it was very easy to tell
+which messages were which because some were unique fixed sizes. The 'exit'
+command was used, as it was very obvious which packet contained that message
+given that it was the correct length and the server closed the connection
+immediately after receiving it.
+
+A script was written in Python to brute-force the ...
+
+After the key had been found, the messages could be decrypted. There were
+messages in the capture that fitted the size of a file transfer, so the
+previous message had to be the command to initiate the transfer. This
+assumption proved to be correct, and was decrypted to 'get flag.pdf'.
+
+The subsequent packets (there were many of them) were copied out of the file
+as hexadecimal strings, and reconstructed in a text editor. This text was then
+taken into Python and decoded using the functions from the VSTP code and the
+key found earlier. This produced a PDF file, which contained an image containing
+the text of the flag - 'ArmsHungerGiftQuick149'.
+
 \subsection{Retrospective Approach}
-Retrospective approach details go here
+If more care had been taken in understanding the source code, some time could
+have been saved - initially, it was thought that the server used its own IP
+in the session key, but it actually used the client's address. Had this been
+realised earlier, several runs of the brute force script could have been
+prevented.
+
+If there had been more time, it may have been more efficient to write a
+script to take the PCAP file and reconstruct the data for the PDF file
+instead of copying it out of Wireshark manually packet by packet. Although
+the time taken writing such a script could easily have taken longer than
+doing it manually.
 
 \section{Question 3.2.1}
 \textbf{INSERT MITIGATION QUESTION}
@@ -60,9 +130,23 @@ Approach details go here
 code. Review the code and exploit the vulnerability to retrieve the flag from
 the snort home directory}
 \subsection{Approach}
-Approach details go here
+It was very easy to find the buffer overflow in the C code that was provided.
+It was the result of a strcpy call in a logging function. When a block that
+looked like a GPG header was detected by the IDS, it would log the block,
+temporarily copying it into a 799 byte buffer. If the message was malformed
+and longer than this size, it would overflow the bounds of the buffer.
+
+It was quite simple to exploit this at a simple level, to just crash the
+process. This proved that it was definitely overflowing, and that arbirary
+code would be able to be injected. None of the members on the team were
+able to exploit the vulnerability though, as although research had been done
+into how to detect and mitigate buffer overflows had been done, it was not
+known how the shellcode injected into the application was designed.
+
 \subsection{Retrospective Approach}
-Retrospective approach details go here
+Had some more research and practice exploiting buffer overflows been done, the
+team may have been able to formulate a payload that could be injected into
+the applicaiton.
 
 \section{Question 3.3.1}
 \textbf{Unknown mitigation question}
