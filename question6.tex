@@ -1,7 +1,11 @@
 \chapter{Question 6 - VPN Security Analysis}
 
 \section{Preparation}
-Prep goes here
+The process of setting up a VPN on our own hardware before the competition was
+conducted for fun, to give us a platform on which to practice and also to help
+use develop a better understanding of VPN configurations and setups for this
+section. We spent almost a week wading through a huge amount of configuration
+documentation and guides before ultimately putting the VPN together. 
 
 \section{Given Information}
 All teams were given a file: vpn-solution.zip\\
@@ -11,47 +15,70 @@ For each of these areas we had to identify how the current configuration
 implements these functions, identify weaknesses in the current configuration and
 detail changes that would improve the security of the deployed solution.
 
+\section{Mitigation Questions 6.1 - 6.5}
+\subsection{Retrospective Approach}
+We left this section far too late in the competition to be able to successfully
+complete all the questions, starting on Q6.1 with a little over 90 minutes left.
+This is likely because the scoring system seemed to put a higher importance on
+retrieving flags than answering mitigation questions, so we focused most of our
+efforts on flags instead. Doing it over again we would likely have spent more
+time on these questions at a far earlier stage, as they were relatively easy to
+answer, just time consuming to do so.
+
 \section{Mitigation Question 6.1}
 \textbf{Review how the current configuration implements authentication, identify
 any weaknesses and detail changes that would improve the security of the
 deployed solution}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+As there is such a huge range of OpenVPN configuration settings, there was no
+real way to just look at the files provided and properly understand what they
+were doing. In order to get a better overview of what each individual setting
+did we resorted to the OpenVPN man pages \cite{OpenVPNMan}, searching for each
+setting and writing down what it did. As the man pages are very verbose,
+containing example values for each setting, as well as outlining potential
+security issues when using certain values, it was relatively straightforward to
+determine where errors could possibly be found.
+
+We then drew up a map of the network, with the settings at each and what effect
+that would have had on the connection. By doing this we were able to
+successfully determine the issues with authentication was the use of static
+pre-shared keys instead of a handshake-based protocol such as TLS. We advised
+that they switch to an authentication protocol that utilises a certificate
+authority, such as TLS.
 
 \section{Mitigation Question 6.2}
 \textbf{Review how the current configuration implements encryption, identify any
 weaknesses and detail changes that would improve the security of the deployed
 solution}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+Using an approach similar to above we were able to successfully determine that
+the issue with encryption was the use of an insecure, outdated cipher (namely
+DES-CBC). We suggested that they utilise a crytographically secure encryption
+method instead, such as the default OpenVPN cipher, AES.
 
 \section{Mitigation Question 6.3}
 \textbf{Review how the current configuration implements VPN termination points,
 identify any weaknesses and detail changes that would improve the security of
 the deployed solution}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+Due to time constraints, we were unable to begin this question.
 
 \section{Mitigation Question 6.4}
 \textbf{Review how the current configuration implements routing, identify any
 weaknesses and detail changes that would improve the security of the deployed
 solution}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+Due to time constraints, we were unable to begin this question.
 
 \section{Mitigation Question 6.5}
 \textbf{Review how the current configuration implements logging, identify any
 weaknesses and detail changes that would improve the security of the deployed
 solution}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+Using an approach similar to above we were able to successfully determine that
+the issue with logging was that the serveside log file was saved in a user
+directory. User directories in UNIX are by default, world readable, and hence
+the log file would be able to be read by any user logged into the system. We
+advised that they move the log file into a system folder or one accessible only
+by root, as well as changing the permissions to ensure that only privileged
+users have any access to the log files.
