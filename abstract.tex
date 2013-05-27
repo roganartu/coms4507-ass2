@@ -1,9 +1,9 @@
 \chapter{Abstract}
 
-This report is a summary of the questions and tasks that the University of
-Queensland 1 (UQ1) team answered in the recent Cyber Security Challenge
-Australia (CySCA) competition, which was run jointly by Telstra and the
-Defence Signals Directorate (DSD).
+This report is a description and analysis of the questions and tasks that the 
+University of Queensland 1 (UQ1) team answered in the recent Cyber Security
+Challenge Australia (CySCA) competition, which was run jointly by Telstra and
+the Defence Signals Directorate (DSD).
 
 The team attempted questions from many sections of the competition, and
 captured many of the flags. Overall, the team achieved twelfth place out of
@@ -23,7 +23,33 @@ in the outdated Java version installed. This enabled a saved password to be
 stolen from the user's browser profile. Unfortunately, a privilege escalation
 method was not found, so the subsequent flags were not able to be captured.
 
-...
+The third question involved assessing application code to find vulnerabilities.
+A client and server application, written in Python, was supplied to the group.
+The applications used an imaginary protocol called the Very Secure Transfer
+Protocol. The team had to first find a command injection vulnerability, which
+was exploited to be able to download a file from the server which was outside
+the transfer server's document root. After succeeding in this, a network
+capture file, also found on the VSTP server, was downloaded, and a
+cryptographic weakness in the protocol had to be found so the packets in the
+capture could be decrypted. This turned out to be in the session key
+generation algorithm, which was very badly designed and created a key with only
+thirty bits of entropy, which is easily found with a brute-force algorithm.
+Finding the key made decrypting the file transferred in the capture possible,
+and the flag was found. The last flag required exploiting a buffer overflow
+vulnerability in a custom Snort IDS plugin, and although the issue was
+easily found, an exploit was not able to be formulated for it.
+
+The fourth question... 
+
+In Question 5, only the first question was answered by the team. Solutions to
+the following parts were unfortunately not found.
+
+The final question involved analysing a set of configuration files for an 
+OpenVPN setup. Some of these were successfully answered, but this question was
+left until too late in the competition to find answers to all of them. This
+was unfortunate, because it would have helped push the team's ranking up. It
+had been left until late in the competition because capturing flags seemed to
+make a much bigger improvement to rankings than the questions.
 
 Overall, the challenge was extremely enjoyable, and all the members of the
 group leant a great deal about computer security and penetration testing.
