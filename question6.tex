@@ -75,4 +75,10 @@ Due to time constraints, we were unable to begin this question.
 weaknesses and detail changes that would improve the security of the deployed
 solution}
 \subsection{Approach}
-Approach details go here
+Using an approach similar to above we were able to successfully determine that
+the issue with logging was that the serveside log file was saved in a user
+directory. User directories in UNIX are by default, world readable, and hence
+the log file would be able to be read by any user logged into the system. We
+advised that they move the log file into a system folder or one accessible only
+by root, as well as changing the permissions to ensure that only privileged
+users have any access to the log files.
