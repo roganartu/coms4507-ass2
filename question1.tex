@@ -1,7 +1,21 @@
 \chapter{Question 1 - Web Application Pentest}
 
 \section{Preparation}
-Prep goes here
+In order to prepare for the web application pentest we sought out and installed
+a number of intentionally vulnerable web applications, including BadStore
+\cite{BadStore}, Damn Vulnerable Web App \cite{DamnVulnerableWebApp} and
+HackThisSite \cite{HackThisSite}. A number of web application pentest tools are
+available as part of the Kali distribution we elected to use, however a large
+focus of our preparation was on SQL injection and hence we worked mainly with
+sqlmap. For network sniffing and vulnerable path discovery both Nessus and nmap
+were explored and utilised.
+
+In order to better understand how SQL injection worked, we also researched
+common SQL injection attacks and how to perform them manually (including blind
+attacks and program version discovery methods). Additionally, most members of
+our team had some working knowledge of how to use the web page inspection tools
+offered by Chrome and Firefox, allowing us to easily inspect web pages to better
+understand their inner workings and what requests are related to page requests.
 
 \section{Given Information}
 Pentest the web server that is hosted in the environment at www.synergise.cysca
