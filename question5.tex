@@ -1,7 +1,10 @@
 \chapter{Question 5 - Network Forensics}
 
 \section{Preparation}
-Prep goes here
+It wasn't clear what was going to be required for the network forensics part
+of the competition, so not much preparation could be done. For the most part,
+preparation consisted of getting familiar with using the tools that would
+likely be required, such as Wireshark.
 
 \section{Given Information}
 All teams were given a file: network-forensics.zip\\
@@ -13,9 +16,14 @@ The file contained a network capture file (PCAP).
 \\\\
 Example answer format: [CVE-1234-1234] [msdos]}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+The network capture was of a telnet session between a client and a server. At
+a point in the connection sequence, the server identifies itself as FreeBSD.
+This was the operating system that was targeted by the attack.
+
+Inspection of the capture showed some unusual packets in the key exchange,
+and searching vulnerability databases for issues in the FreeBSD telnet
+daemon involving the key exchange revealed just one CVE, which fit the
+capture exactly. This CVE was CVE-2011-4862 \cite{CVE-2011-4862}.
 
 \section{Question 5.2}
 \textbf{The first payload contains shellcode that invokes system calls i.e.
@@ -24,29 +32,26 @@ Retrospective approach details go here
 \\\\
 Example answer format: [syscall1] [syscall2]}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+The approach required to answer this question was not found by the team.
+Several different methods were tried, including various ways of
+disassembling the payload, but the assembly code to launch system calls
+was not found in the payloads. This meant that they must have been
+obfuscated in some way, but it was not apparent how to decode them.
 
 \section{Question 5.3}
 \textbf{Deobfuscate the second payload to reveal the triple DES key. The key is
 the flag}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+The same problem as in Question 5.2 prevented the team being able to answer
+this question.
 
 \section{Question 5.4}
 \textbf{Once the third payload is decrypted with the above key, it drops out a
 binary. Deobfuscate the key hidden in the binary. The key is the flag}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+As they key in Question 5.3 was not found, this question could not be attempted
 
 \section{Question 5.5}
 \textbf{Decode the communication and retrieve the flag}
 \subsection{Approach}
-Approach details go here
-\subsection{Retrospective Approach}
-Retrospective approach details go here
+As they key in Question 5.3 was not found, this question could not be attempted

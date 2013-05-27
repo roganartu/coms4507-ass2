@@ -5,13 +5,13 @@ Not much preparation was required for this part of the competition, as the
 members of the team were already quite confident in analysing and debugging
 application code. Research was undertaken into common problems that can lead to
 code being vulnerable to various attacks - for example, buffer overflows that
-can allow an attacker to inject arbitary executable code into an application.
+can allow an attacker to inject arbitrary executable code into an application.
 
 \section{Given Information}
-Question 3 centred around an imaginary protocal called VSTP, for the Very 
+Question 3 centred around an imaginary protocol called VSTP, for the Very 
 Secure Transfer Protocol. The protocol was implemented in the Python 
 programming language, and used the gnupg library for public key cryptography
-to establish a secure channel to transfer a 256 bit sesion key, which was then
+to establish a secure channel to transfer a 256 bit session key, which was then
 used to encrypt the rest of the session with AES in cipher feedback mode.
 
 The program then presented a basic command line interface which allowed a user
@@ -52,7 +52,7 @@ passing in the paths entered by the user with little sanitisation. This had
 two implications - firstly, that the user could use the function to access
 files outside the directories that the server was meant to restrict the
 program to, and secondly, the statement could be terminated using the
-semicolon character and arbitary commands run on the server.
+semicolon character and arbitrary commands run on the server.
 
 The flag was a file called '.garbage' located somewhere on the system. To find
 the file, the find command was used. There was a problem trying to use this
@@ -65,7 +65,7 @@ the command to a file so it could be read back:
 \texttt{find / -name ".garbage" > find.out}
 
 The command injection vulnerability was exploited to make the script 
-executable, and then exploitied again to run it. This was done by issuing
+executable, and then exploited again to run it. This was done by issuing
 the following commands:
 \\
 \texttt{push find.sh ~/vstp/find.sh}
@@ -85,15 +85,28 @@ server root using a script:
 \\
 \texttt{cp /home/vstp/.workspace/.garbage /home/vstp/serverroot/}
 
-This was executed the same way as the previous script, 
-
-\subsection{Retrospective Approach}
-None?
+This was executed the same way as the previous script, and then the flag file
+was able to be retrieved with the \texttt{get} command as before.
 
 \section{Question 3.1.1}
-\textbf{INSERT MITIGATION QUESTION}
+\textbf{Explain how the command injection vulnerability can be mitigated}
 \subsection{Approach}
-The mitigaion for this 
+The mitigation for the command injection is quite simple. The most important
+mitigation is to not use the system move command, and instead to use the
+built-in Python filesystem commands to move the file. This would completely
+remove the ability for commands to be injected using the command.
+
+Just doing this would still leave the command able to access files outside the
+serverroot directory - the paths should be checked that they are descendants
+of this directory before the move is performed.
+
+Further security can be added by having the process enter into a 
+\textit{chroot jail} before it accepts any connections. Using the chroot command
+allows the operating system to make it appear to the application that a 
+particular directory is the root directory of the filesystem. Making the
+serverroot directory appear as the filesystem root would make it impossible for
+the program to be able to access files outside this directory even without
+sanitising the paths properly.
 
 \section{Question 3.2}
 \textbf{Located with the previous flag is a PCAP file containing a VSTP session.
@@ -102,7 +115,7 @@ extract the file transferred and retrieve the flag}
 \subsection{Approach}
 At first glance, the VSTP protocol seems quite secure, as it is using a 256
 bit key, which is too large to brute force and will not be able to be cracked
-until a crytographic weakness on AES is found. As AES is currently one of the
+until a cryptographic weakness on AES is found. As AES is currently one of the
 most commonly used ciphers today, it is out of the scope of the competition to
 find such a weakness in it.
 
@@ -116,10 +129,10 @@ depending on how long the IP was), then a two digit random number between 10
 and 74, and the rest with actually random data (produced from the urandom 
 function).
 
-What this unusal key generation method produced was a key with very little
+What this unusual key generation method produced was a key with very little
 entropy. The client IP and date were able to be gathered from the network
 capture, so straight up the first 216 bits were known. This meant that
-only 40 bits needed to be brute forced, which was easily acheivable. The
+only 40 bits needed to be brute forced, which was easily achievable. The
 fact that 16 of those bits were known to be an ASCII number between 10
 and 40 reduces the entropy in the key by 10 bits to only 30 bits.
 
@@ -169,9 +182,11 @@ the time taken writing such a script could easily have taken longer than
 doing it manually.
 
 \section{Question 3.2.1}
-\textbf{INSERT MITIGATION QUESTION}
+\textbf{Explain how this cryptographic weakness can be mitigated}
 \subsection{Approach}
-Approach details go here
+The way to mitigate this vulnerability is simply to use the urandom function
+to generate the entire key, and not hardcoding any part of it. If the key had
+been completely random, it would not have been able to be brute-forced. 
 
 \section{Question 3.3}
 \textbf{There is a buffer overflow vulnerability in the Snort VSTP Preprocessor
@@ -194,9 +209,12 @@ known how the shellcode injected into the application was designed.
 \subsection{Retrospective Approach}
 Had some more research and practice exploiting buffer overflows been done, the
 team may have been able to formulate a payload that could be injected into
-the applicaiton.
+the application.
 
 \section{Question 3.3.1}
-\textbf{Unknown mitigation question}
+\textbf{How could this vulnerability be mitigated?}
 \subsection{Approach}
-Approach details go here
+The mitigation of the buffer overflow is simply to make sure that the length
+of the buffer being copied is not larger than the buffer it's going in to.
+This is simply a matter of using the strncpy command instead of strcpy, and
+passing in a length that is capped to the size of the destination buffer.
