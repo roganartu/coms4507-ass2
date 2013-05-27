@@ -51,7 +51,10 @@ authority, such as TLS.
 weaknesses and detail changes that would improve the security of the deployed
 solution}
 \subsection{Approach}
-Approach details go here
+Using an approach similar to above we were able to successfully determine that
+the issue with encryption was the use of an insecure, outdated cipher (namely
+DES-CBC). We suggested that they utilise a crytographically secure encryption
+method instead, such as the default OpenVPN cipher, AES.
 
 \section{Mitigation Question 6.3}
 \textbf{Review how the current configuration implements VPN termination points,
