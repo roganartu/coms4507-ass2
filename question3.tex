@@ -9,7 +9,7 @@ can allow an attacker to inject arbitary executable code into an application.
 
 \section{Given Information}
 Question 3 centred around an imaginary protocal called VSTP, for the Very 
-Simple Transfer Protocol. The protocol was implemented in the Python 
+Secure Transfer Protocol. The protocol was implemented in the Python 
 programming language, and used the gnupg library for public key cryptography
 to establish a secure channel to transfer a 256 bit sesion key, which was then
 used to encrypt the rest of the session with AES in cipher feedback mode.
@@ -40,14 +40,52 @@ We were also given an unprivileged login to the server (SSH):\\
 \\
 \textbf{Password:} Password123
 
-section{Question 3.1}
+\section{Question 3.1}
 \textbf{There is a command injection vulnerability in the VSTP server code
 (vstp\_server.py). Review the code and exploit the vulnerability to retrieve the
 flag from the ".garbage." file}
 \subsection{Approach}
 An analysis of the code quickly revealed that there was a vulnerability in the
 move file (mv) command - when the server received the command from the user,
-it used the system command to execute the system's move command 
+it used the os.system() command to execute the mv executable on the server,
+passing in the paths entered by the user with little sanitisation. This had
+two implications - firstly, that the user could use the function to access
+files outside the directories that the server was meant to restrict the
+program to, and secondly, the statement could be terminated using the
+semicolon character and arbitary commands run on the server.
+
+The flag was a file called '.garbage' located somewhere on the system. To find
+the file, the find command was used. There was a problem trying to use this
+though - the little sanitisation that was done on the path meant that any
+command containing forward slashes would not work. This was worked around
+by using the VSTP protocol's built in functionality to upload a script file,
+which used the find command to locate the flag file and output the output of
+the command to a file so it could be read back:
+\\
+\texttt{find / -name ".garbage" > find.out}
+
+The command injection vulnerability was exploited to make the script 
+executable, and then exploitied again to run it. This was done by issuing
+the following commands:
+\\
+\texttt{push find.sh ~/vstp/find.sh}
+\\
+\texttt{mv tmp .tmp; chmod +x find.sh}
+\\
+\texttt{mv .tmp tmp; sh find.sh}
+\\
+\texttt{get find.out}
+
+(The VSTP push command uploaded a file from the local side to the server, and
+the get command downloaded files from the server.)
+
+Running this script revealed that the file had the path
+/home/vstp/.workspace/.garbage on the server. The file was copied into the
+server root using a script:
+\\
+\texttt{cp /home/vstp/.workspace/.garbage /home/vstp/serverroot/}
+
+This was executed the same way as the previous script, 
 
 \subsection{Retrospective Approach}
 None?
@@ -94,7 +132,14 @@ command was used, as it was very obvious which packet contained that message
 given that it was the correct length and the server closed the connection
 immediately after receiving it.
 
-A script was written in Python to brute-force the ...
+A script was written in Python to brute-force the key. The Python language
+was chosen because it was the easiest way to implement it - although using a
+compiled language like C would have made the running time of the program far
+shorter, it would have been much more difficult to write. With Python, it was
+just a matter of writing the key generation algorithm, and then calling the
+VSTP code's AES decryption methods. Using C would have required 
+re-implementing those parts. The listing for the brute-forcer is included
+below.
 
 After the key had been found, the messages could be decrypted. There were
 messages in the capture that fitted the size of a file transfer, so the
@@ -106,6 +151,9 @@ as hexadecimal strings, and reconstructed in a text editor. This text was then
 taken into Python and decoded using the functions from the VSTP code and the
 key found earlier. This produced a PDF file, which contained an image containing
 the text of the flag - 'ArmsHungerGiftQuick149'.
+
+The code written to brute force the key was as follows:
+\lstinputlisting[style=python]{code/bruteforce.py}
 
 \subsection{Retrospective Approach}
 If more care had been taken in understanding the source code, some time could
