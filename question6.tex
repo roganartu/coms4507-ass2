@@ -30,7 +30,21 @@ answer, just time consuming to do so.
 any weaknesses and detail changes that would improve the security of the
 deployed solution}
 \subsection{Approach}
-Approach details go here
+As there is such a huge range of OpenVPN configuration settings, there was no
+real way to just look at the files provided and properly understand what they
+were doing. In order to get a better overview of what each individual setting
+did we resorted to the OpenVPN man pages \cite{OpenVPNMan}, searching for each
+setting and writing down what it did. As the man pages are very verbose,
+containing example values for each setting, as well as outlining potential
+security issues when using certain values, it was relatively straightforward to
+determine where errors could possibly be found.
+
+We then drew up a map of the network, with the settings at each and what effect
+that would have had on the connection. By doing this we were able to
+successfully determine the issues with authentication was the use of static
+pre-shared keys instead of a handshake-based protocol such as TLS. We advised
+that they switch to an authentication protocol that utilises a certificate
+authority, such as TLS.
 
 \section{Mitigation Question 6.2}
 \textbf{Review how the current configuration implements encryption, identify any
