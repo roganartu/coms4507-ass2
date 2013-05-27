@@ -14,7 +14,7 @@ all: report.pdf
 report.pdf: $(SRCS)
 	pdflatex report
 	bibtex report
-	#pdflatex report
+	pdflatex report
 	pdflatex report
 
 clean:
